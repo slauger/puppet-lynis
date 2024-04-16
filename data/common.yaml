@@ -1,0 +1,4 @@
+---
+lynis::cron_ensure: present
+lynis::cron_hour: ~
+lynis::cron_minute: ~
