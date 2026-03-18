@@ -3,4 +3,5 @@
 ---
 fixtures:
   forge_modules:
+    cron_core: "puppetlabs/cron_core"
 #     stdlib: "puppetlabs/stdlib"
