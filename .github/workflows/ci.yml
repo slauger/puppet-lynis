@@ -1,0 +1,61 @@
+---
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  validate:
+    name: Validate
+    runs-on: ubuntu-24.04
+    env:
+      PUPPET_GEM_VERSION: '~> 8.0'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+
+      - name: Run syntax check
+        run: bundle exec rake syntax
+
+      - name: Run metadata_lint
+        run: bundle exec rake metadata_lint
+
+      - name: Run lint
+        run: bundle exec rake lint
+
+      - name: Run rubocop
+        run: bundle exec rake rubocop
+
+  unit-test:
+    name: "Unit Tests (Puppet ${{ matrix.puppet }})"
+    runs-on: ubuntu-24.04
+    needs: validate
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - puppet: '7'
+            ruby: '2.7'
+          - puppet: '8'
+            ruby: '3.2'
+    env:
+      PUPPET_GEM_VERSION: "~> ${{ matrix.puppet }}.0"
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true
+
+      - name: Run unit tests
+        run: bundle exec rake spec
